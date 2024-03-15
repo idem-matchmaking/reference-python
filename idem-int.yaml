@@ -1,0 +1,449 @@
+openapi: 3.0.3
+servers:
+- url: https://api-int.idem.gg
+info:
+  title: Matchmaking API
+  version: 1.1.0
+  description: "\nThis API provides access to matchmaking.\n\
+    ### Authentication via Token\nAuthentication with this API is achieved using tokens. \n\
+    \ To retrieve a token, send a POST request to \n\
+    \ - Host: `https://cognito-idp.eu-central-1.amazonaws.com/`\n \
+    \ - Headers:  \n\
+    \   - `X-Amz-Target: AWSCognitoIdentityProviderService.InitiateAuth` \n\
+    \     - `Content-Type: application/x-amz-json-1.1`\n\
+    \ - Request body: \
+    \ `{\"AuthParameters\":{\"USERNAME\": \"<your username>\",\"PASSWORD\":\"<your-password>\"},\"AuthFlow\":\"USER_PASSWORD_AUTH\",\"ClientId\":\"3b7bo4gjuqsjuer6eatjsgo58u\"}` \
+    \ \n\nThe reponse contains an `IdToken` in the `AuthenticationResult`. This token is to be used for the `Authorization` header on all requests of this API. Remark: Please just provide the token in the Authorization header, there is no \"Bearer\" in the value.\
+    \ \n\n### Process flow \n\
+    \ - Add players to the matchmaking queue with `/games/{gameId}/players` \n\
+    \ - Retrieve match suggestions with `/games/{gameId}/matches` \n\
+    \ - Confirm match creation with `/games/{gameId}/matches/{matchId}/statuses/confirmed` \n\
+    \ - Report completed match using `/games/{gameId}/matches/{matchId}/statuses/completed` \
+    "
+tags:
+  - name: players
+    description: Endpoints for player functionality
+  - name: matches
+    description: Endpoints for match functionality
+  - name: stats
+    description: Endpoint for statistics
+  - name: admin
+    description: Adminstrative endpoints
+paths:
+  /games/{gameId}/players:
+    post:
+      summary: Add a player or a party
+      tags:
+        - players
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the game
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartySubmission'
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: Success message upon adding a party
+    get:
+      summary: Get a list of players
+      tags:
+        - players
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the game
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: List of players retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayerState'
+  /games/{gameId}/players/{playerId}:
+    delete:
+      summary: Remove a player by id
+      tags:
+        - players
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the game
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the person to be deleted
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: Success message upon deleting a person
+  /games/{gameId}/matches:
+    post:
+      summary: Retrieve match suggestions
+      tags:
+        - matches
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the game
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: List of suggested matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+  /games/{gameId}/matches/{matchId}/statuses/confirmed:
+    post:
+      summary: Confirm the creation of a match
+      tags:
+        - matches
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the game
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the match
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: Successful operation
+  /games/{gameId}/matches/{matchId}/statuses/failed:
+    post:
+      summary: Report failed match creation
+      tags:
+        - matches
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the game
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                remove:
+                  type: array
+                  items:
+                    type: string
+                requeue:
+                  type: array
+                  items:
+                    type: string
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: Successful operation
+  /games/{gameId}/matches/{matchId}/statuses/completed:
+    post:
+      summary: Report completed match
+      tags:
+        - matches
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the game
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id of the match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchRankingSubmission'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Ranking and rating result
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/MatchRankingResult'
+  /players/{playerId}:
+    get:
+      summary: Retrieve player statistics
+      tags:
+      - stats
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Player ID
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Ranking and rating result
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/PlayerStatistics'
+  /admin/season/reset:
+    post:
+      summary: Schedule a season reset
+      tags:
+        - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                seasonName:
+                  type: string
+                seasonStart:
+                  type: string
+                  description: datetime for the start of the season in isoformat
+                percentages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      gameId:
+                        type: string
+                      percentage:
+                        type: number
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: Successful operation
+components:
+  schemas:
+    PartySubmission:
+      type: object
+      properties:
+        partyName:
+          type: string
+          description: Optional name of the party
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerSubmission'
+      required: [players]
+    PlayerSubmission:
+      type: object
+      properties:
+        playerId:
+          type: string
+          description: ID of the player
+        servers:
+          type: array
+          description: The servers the player can be matched on
+          items:
+            type: string
+    Match:
+      type: object
+      properties:
+        uuid:
+          type: string
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/Team'
+    Team:
+      type: object
+      properties:
+        player_ids:
+          type: array
+          items:
+            type: string
+    MatchRankingSubmission:
+      type: object
+      properties:
+        server:
+          type: string
+        gameLength:
+          type: number
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamRankingSubmission'
+    TeamRankingSubmission:
+      type: object
+      properties:
+        rank:
+          type: integer
+          description: Winners start with 0, increases as teams get worse.
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerRankingSubmission'
+    PlayerRankingSubmission:
+      type: object
+      properties:
+        playerId:
+          type: string
+          description: ID of the player
+        score:
+          type: number
+          description: Independent of winning, score is a measure of single player performance
+    MatchRankingResult:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerStats'
+    PlayerStats:
+      type: object
+      properties:
+        playerId:
+          type: string
+          description: ID of the player
+        rating:
+          type: number
+        ratingUncertainty:
+          type: number
+        rankingPoints:
+          type: number
+        ratingDeltaLastGame:
+          type: number
+        rankingDeltaLastGame:
+          type: number
+        wins:
+          type: integer
+        losses:
+          type: integer
+        matchesPlayed:
+          type: integer
+        winRatio:
+          type: number
+        seasonWins:
+          type: integer
+        seasonLosses:
+          type: integer
+        seasonMatchesPlayed:
+          type: integer
+        totalWins:
+          type: integer
+        totalLosses:
+          type: integer
+        totalMatchesPlayed:
+          type: integer
+        season:
+          type: string
+    PlayerStatistics:
+      type: object
+      properties:
+        playerId:
+          type: string
+          description: ID of the player
+        totalWins:
+          type: integer
+        totalLosses:
+          type: integer
+        totalMatchesPlayed:
+          type: integer
+        seasons:
+          type: array
+          items:
+            type: object
+            properties:
+              season:
+                type: string
+              seasonWins:
+                type: integer
+              seasonLosses:
+                type: integer
+              seasonMatchesPlayed:
+                type: integer
+              stats:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rating:
+                      type: number
+                    ratingUncertainty:
+                      type: number
+                    rankingPoints:
+                      type: number
+                    wins:
+                      type: integer
+                    losses:
+                      type: integer
+                    matchesPlayed:
+                      type: integer
+                    winRatio:
+                      type: number
+                    mode:
+                      type: string
+    PlayerState:
+      type: object
+      properties:
+        playerId:
+          type: string
+          description: ID of the player
+        state:
+          $ref: '#/components/schemas/PlayerStatusEnum'
+    PlayerStatusEnum:
+      type: string
+      enum:
+        - waiting
+        - matched
+  securitySchemes:
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication
