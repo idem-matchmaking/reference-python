@@ -12,41 +12,49 @@ T = TypeVar("T", bound="PlayerSubmission")
 class PlayerSubmission:
     """
     Attributes:
-        player_id (Union[Unset, str]): ID of the player
-        servers (Union[Unset, List[str]]): The servers the player can be matched on
+        player_id (str): ID of the player
+        servers (List[str]): The servers the player can be matched on
+        reference (Union[Unset, str]): optional end-to-end reference set when adding the party
     """
 
-    player_id: Union[Unset, str] = UNSET
-    servers: Union[Unset, List[str]] = UNSET
+    player_id: str
+    servers: List[str]
+    reference: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         player_id = self.player_id
 
-        servers: Union[Unset, List[str]] = UNSET
-        if not isinstance(self.servers, Unset):
-            servers = self.servers
+        servers = self.servers
+
+        reference = self.reference
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if player_id is not UNSET:
-            field_dict["playerId"] = player_id
-        if servers is not UNSET:
-            field_dict["servers"] = servers
+        field_dict.update(
+            {
+                "playerId": player_id,
+                "servers": servers,
+            }
+        )
+        if reference is not UNSET:
+            field_dict["reference"] = reference
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        player_id = d.pop("playerId", UNSET)
+        player_id = d.pop("playerId")
 
-        servers = cast(List[str], d.pop("servers", UNSET))
+        servers = cast(List[str], d.pop("servers"))
+
+        reference = d.pop("reference", UNSET)
 
         player_submission = cls(
             player_id=player_id,
             servers=servers,
+            reference=reference,
         )
 
         player_submission.additional_properties = d

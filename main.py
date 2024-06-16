@@ -15,6 +15,9 @@ from matchmaking_api_client.api.players import (
     get_games_game_id_players as get_players_api,
 )
 from matchmaking_api_client.api.players import post_games_game_id_players
+from matchmaking_api_client.api.stats import (
+    get_players_player_id as get_player_stats_api,
+)
 from matchmaking_api_client.models import (
     Match,
     MatchRankingSubmission,
@@ -39,6 +42,7 @@ def add_player(player_id: str):
             # such as acceptable game servers, as well player choices that influence rating.
             PlayerSubmission(
                 player_id=player_id,
+                reference=f"{player_id}_internal_id_{random.randint(100, 999)}",
                 servers=[
                     "example-gameserver-1"
                 ],  # Here, we only provide a single game server
@@ -46,6 +50,7 @@ def add_player(player_id: str):
         ],
         party_name=player_id,  # Optionally, parties can have a name
     )
+    submission.players[0].additional_properties["partitionHash"] = "example_partition_hash"
     response = post_games_game_id_players.sync_detailed(
         GAME_ID,
         client=get_client(),
@@ -87,13 +92,14 @@ def get_players() -> list[PlayerState]:
 
 def get_suggested_matches() -> list[Match]:
     """Retrieve match suggestions from the matchmaking API"""
-    suggested_matches: list[Match] = get_matches.sync(GAME_ID, client=get_client())
+    matches_response = get_matches.sync_detailed(GAME_ID, client=get_client())
+    suggested_matches: list[Match] = matches_response.parsed
 
     # print some info about suggested matches
     match_infos = []
     for match in suggested_matches:
         player_info = ", ".join(
-            [player_id for team in match.teams for player_id in team.player_ids]
+            [player.player_id for team in match.teams for player in team.players]
         )
         match_infos.append(f"Match: {match.uuid} with players {player_info}")
     match_summary = "\n  ".join(match_infos) if match_infos else "No suggested matches"
@@ -161,6 +167,22 @@ def update_match_completed(match_id: str, winning_player: str, losing_player: st
         )
 
 
+def get_player_stats(player_id: str):
+    """Retrieve player statistics"""
+    response = get_player_stats_api.sync_detailed(player_id, client=get_client())
+    if response.status_code == 200:
+        player_stats = response.parsed
+        print(
+            f"""Player {player_id} stats:
+        # of games played: {player_stats.total_matches_played}, # won: {player_stats.total_wins}
+        """
+        )
+    else:
+        print(
+            f"Failed to retrieve player stats for {player_id}. Status code {response.status_code}."
+        )
+
+
 def wait_for_user():
     input("Press Enter to continue")
 
@@ -200,13 +222,20 @@ def main():
         )
         # randomize the winner
         players = [
-            suggested_match.teams[0].player_ids[0],
-            suggested_match.teams[1].player_ids[0],
+            suggested_match.teams[0].players[0],
+            suggested_match.teams[1].players[0],
         ]
         players = random.sample(players, k=2)
         winning_player = players.pop()
         losing_player = players.pop()
-        update_match_completed(suggested_match.uuid, winning_player, losing_player)
+        update_match_completed(
+            suggested_match.uuid, winning_player.player_id, losing_player.player_id
+        )
+
+        print("Now, let's retrieve the updated player stats")
+        wait_for_user()
+        for player in [winning_player, losing_player]:
+            get_player_stats(player.player_id)
 
     print("This concludes our short tour. Thank you for your time.")
 

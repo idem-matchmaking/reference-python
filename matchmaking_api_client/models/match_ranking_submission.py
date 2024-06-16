@@ -16,37 +16,37 @@ T = TypeVar("T", bound="MatchRankingSubmission")
 class MatchRankingSubmission:
     """
     Attributes:
+        teams (List['TeamRankingSubmission']):
         server (Union[Unset, str]):
         game_length (Union[Unset, float]):
-        teams (Union[Unset, List['TeamRankingSubmission']]):
     """
 
+    teams: List["TeamRankingSubmission"]
     server: Union[Unset, str] = UNSET
     game_length: Union[Unset, float] = UNSET
-    teams: Union[Unset, List["TeamRankingSubmission"]] = UNSET
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
+        teams = []
+        for teams_item_data in self.teams:
+            teams_item = teams_item_data.to_dict()
+            teams.append(teams_item)
+
         server = self.server
 
         game_length = self.game_length
 
-        teams: Union[Unset, List[Dict[str, Any]]] = UNSET
-        if not isinstance(self.teams, Unset):
-            teams = []
-            for teams_item_data in self.teams:
-                teams_item = teams_item_data.to_dict()
-                teams.append(teams_item)
-
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
+        field_dict.update(
+            {
+                "teams": teams,
+            }
+        )
         if server is not UNSET:
             field_dict["server"] = server
         if game_length is not UNSET:
             field_dict["gameLength"] = game_length
-        if teams is not UNSET:
-            field_dict["teams"] = teams
 
         return field_dict
 
@@ -55,21 +55,21 @@ class MatchRankingSubmission:
         from ..models.team_ranking_submission import TeamRankingSubmission
 
         d = src_dict.copy()
-        server = d.pop("server", UNSET)
-
-        game_length = d.pop("gameLength", UNSET)
-
         teams = []
-        _teams = d.pop("teams", UNSET)
-        for teams_item_data in _teams or []:
+        _teams = d.pop("teams")
+        for teams_item_data in _teams:
             teams_item = TeamRankingSubmission.from_dict(teams_item_data)
 
             teams.append(teams_item)
 
+        server = d.pop("server", UNSET)
+
+        game_length = d.pop("gameLength", UNSET)
+
         match_ranking_submission = cls(
+            teams=teams,
             server=server,
             game_length=game_length,
-            teams=teams,
         )
 
         match_ranking_submission.additional_properties = d

@@ -1,9 +1,7 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, Dict, List, Type, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PlayerRankingSubmission")
 
@@ -12,12 +10,12 @@ T = TypeVar("T", bound="PlayerRankingSubmission")
 class PlayerRankingSubmission:
     """
     Attributes:
-        player_id (Union[Unset, str]): ID of the player
-        score (Union[Unset, float]): Independent of winning, score is a measure of single player performance
+        player_id (str): ID of the player
+        score (float): Independent of winning, score is a measure of single player performance
     """
 
-    player_id: Union[Unset, str] = UNSET
-    score: Union[Unset, float] = UNSET
+    player_id: str
+    score: float
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -27,20 +25,21 @@ class PlayerRankingSubmission:
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if player_id is not UNSET:
-            field_dict["playerId"] = player_id
-        if score is not UNSET:
-            field_dict["score"] = score
+        field_dict.update(
+            {
+                "playerId": player_id,
+                "score": score,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        player_id = d.pop("playerId", UNSET)
+        player_id = d.pop("playerId")
 
-        score = d.pop("score", UNSET)
+        score = d.pop("score")
 
         player_ranking_submission = cls(
             player_id=player_id,

@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.player_ranking_submission import PlayerRankingSubmission
@@ -16,31 +14,30 @@ T = TypeVar("T", bound="TeamRankingSubmission")
 class TeamRankingSubmission:
     """
     Attributes:
-        rank (Union[Unset, int]): Winners start with 0, increases as teams get worse.
-        players (Union[Unset, List['PlayerRankingSubmission']]):
+        rank (int): Winners start with 0, increases as teams get worse.
+        players (List['PlayerRankingSubmission']):
     """
 
-    rank: Union[Unset, int] = UNSET
-    players: Union[Unset, List["PlayerRankingSubmission"]] = UNSET
+    rank: int
+    players: List["PlayerRankingSubmission"]
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         rank = self.rank
 
-        players: Union[Unset, List[Dict[str, Any]]] = UNSET
-        if not isinstance(self.players, Unset):
-            players = []
-            for players_item_data in self.players:
-                players_item = players_item_data.to_dict()
-                players.append(players_item)
+        players = []
+        for players_item_data in self.players:
+            players_item = players_item_data.to_dict()
+            players.append(players_item)
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if rank is not UNSET:
-            field_dict["rank"] = rank
-        if players is not UNSET:
-            field_dict["players"] = players
+        field_dict.update(
+            {
+                "rank": rank,
+                "players": players,
+            }
+        )
 
         return field_dict
 
@@ -49,11 +46,11 @@ class TeamRankingSubmission:
         from ..models.player_ranking_submission import PlayerRankingSubmission
 
         d = src_dict.copy()
-        rank = d.pop("rank", UNSET)
+        rank = d.pop("rank")
 
         players = []
-        _players = d.pop("players", UNSET)
-        for players_item_data in _players or []:
+        _players = d.pop("players")
+        for players_item_data in _players:
             players_item = PlayerRankingSubmission.from_dict(players_item_data)
 
             players.append(players_item)

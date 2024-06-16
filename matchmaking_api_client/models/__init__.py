@@ -1,6 +1,7 @@
 """ Contains all the data models used in inputs/outputs """
 
 from .match import Match
+from .match_player import MatchPlayer
 from .match_ranking_result import MatchRankingResult
 from .match_ranking_submission import MatchRankingSubmission
 from .party_submission import PartySubmission
@@ -26,6 +27,7 @@ from .team_ranking_submission import TeamRankingSubmission
 
 __all__ = (
     "Match",
+    "MatchPlayer",
     "MatchRankingResult",
     "MatchRankingSubmission",
     "PartySubmission",

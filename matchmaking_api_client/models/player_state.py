@@ -1,10 +1,9 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, Dict, List, Type, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.player_status_enum import PlayerStatusEnum
-from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PlayerState")
 
@@ -13,42 +12,36 @@ T = TypeVar("T", bound="PlayerState")
 class PlayerState:
     """
     Attributes:
-        player_id (Union[Unset, str]): ID of the player
-        state (Union[Unset, PlayerStatusEnum]):
+        player_id (str): ID of the player
+        state (PlayerStatusEnum):
     """
 
-    player_id: Union[Unset, str] = UNSET
-    state: Union[Unset, PlayerStatusEnum] = UNSET
+    player_id: str
+    state: PlayerStatusEnum
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         player_id = self.player_id
 
-        state: Union[Unset, str] = UNSET
-        if not isinstance(self.state, Unset):
-            state = self.state.value
+        state = self.state.value
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if player_id is not UNSET:
-            field_dict["playerId"] = player_id
-        if state is not UNSET:
-            field_dict["state"] = state
+        field_dict.update(
+            {
+                "playerId": player_id,
+                "state": state,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        player_id = d.pop("playerId", UNSET)
+        player_id = d.pop("playerId")
 
-        _state = d.pop("state", UNSET)
-        state: Union[Unset, PlayerStatusEnum]
-        if isinstance(_state, Unset):
-            state = UNSET
-        else:
-            state = PlayerStatusEnum(_state)
+        state = PlayerStatusEnum(d.pop("state"))
 
         player_state = cls(
             player_id=player_id,

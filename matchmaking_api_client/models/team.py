@@ -1,9 +1,11 @@
-from typing import Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
+if TYPE_CHECKING:
+    from ..models.match_player import MatchPlayer
+
 
 T = TypeVar("T", bound="Team")
 
@@ -12,32 +14,42 @@ T = TypeVar("T", bound="Team")
 class Team:
     """
     Attributes:
-        player_ids (Union[Unset, List[str]]):
+        players (List['MatchPlayer']):
     """
 
-    player_ids: Union[Unset, List[str]] = UNSET
+    players: List["MatchPlayer"]
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        player_ids: Union[Unset, List[str]] = UNSET
-        if not isinstance(self.player_ids, Unset):
-            player_ids = self.player_ids
+        players = []
+        for players_item_data in self.players:
+            players_item = players_item_data.to_dict()
+            players.append(players_item)
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if player_ids is not UNSET:
-            field_dict["player_ids"] = player_ids
+        field_dict.update(
+            {
+                "players": players,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.match_player import MatchPlayer
+
         d = src_dict.copy()
-        player_ids = cast(List[str], d.pop("player_ids", UNSET))
+        players = []
+        _players = d.pop("players")
+        for players_item_data in _players:
+            players_item = MatchPlayer.from_dict(players_item_data)
+
+            players.append(players_item)
 
         team = cls(
-            player_ids=player_ids,
+            players=players,
         )
 
         team.additional_properties = d

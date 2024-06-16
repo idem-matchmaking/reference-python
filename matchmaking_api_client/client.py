@@ -176,7 +176,7 @@ class AuthenticatedClient:
     _async_client: Optional[httpx.AsyncClient] = field(default=None, init=False)
 
     token: str
-    prefix: str = None
+    prefix: str = "Bearer"
     auth_header_name: str = "Authorization"
 
     def with_headers(self, headers: Dict[str, str]) -> "AuthenticatedClient":
