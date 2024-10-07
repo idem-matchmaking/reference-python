@@ -1,11 +1,11 @@
 import boto3
 from matchmaking_api_client.client import AuthenticatedClient
 
-CLIENT_ID = "3b7bo4gjuqsjuer6eatjsgo58u"
-USERNAME = "<username>"
+CLIENT_ID = "3ns1sc0lkrdqh25qvrqb9k3a80"
+USERNAME = "<username>
 PASSWORD = "<password>"
 GAME_ID = "1v1"
-API_URL = "https://api-int.idem.gg"
+API_URL = "https://api.beta.idem.gg"
 
 
 def _get_auth_token(username, password, client_id):
